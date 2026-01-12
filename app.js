@@ -1007,17 +1007,10 @@ function renderArtifactsPage(type, title, subtitle) {
                          <div id="menu-${item.id}" class="action-menu hidden absolute right-0 top-8 w-40 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
                             <div class="py-1">
                                 ${item.status === 'draft' ? `
-                                <button onclick="window.sendArtifact('${item.id}')" class="w-full text-left px-4 py-2 text-sm text-emerald-600 hover:bg-emerald-50 flex items-center gap-2">
-                                    <i data-lucide="send" class="w-4 h-4 text-emerald-500"></i> Kirim ke Admin
-                                </button>
                                 <button onclick="window.showArtifactModal('${type}', '${title}', '${item.id}')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                     <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i> Edit
                                 </button>
-                                ` : `
-                                <div class="px-4 py-2 text-xs text-gray-400 italic text-center border-b border-gray-50">
-                                    ${item.status === 'received' ? 'Sudah Diterima' : 'Menunggu Review'}
-                                </div>
-                                `}
+                                ` : ''}
                                 <button onclick="window.deleteArtifact('${item.id}')" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-50">
                                     <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i> Hapus
                                 </button>
@@ -1040,23 +1033,33 @@ function renderArtifactsPage(type, title, subtitle) {
                     </a>
                     ` : ''}
 
-                    <div class="pt-4 border-t border-dashed border-gray-100">
+                    <div class="pt-4 border-t border-dashed border-gray-100 flex items-center justify-between">
                         ${isAdmin ? `
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center gap-2 text-xs text-gray-500">
-                                <i data-lucide="user" class="w-3 h-3"></i>
-                                <span>Oleh: <strong>${getTeacherName(item.guruId)}</strong></span>
-                            </div>
-                            ${item.status === 'sent' ? `
-                            <button onclick="window.markArtifactAsReceived('${item.id}')" class="px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
-                                Terima
-                            </button>
-                            ` : `
-                            <div class="px-2 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase rounded-lg border border-emerald-100">
-                                Diterima
-                            </div>
-                            `}
+                        <div class="flex items-center gap-2 text-xs text-gray-500">
+                            <i data-lucide="user" class="w-3 h-3"></i>
+                            <span>Oleh: <strong>${getTeacherName(item.guruId)}</strong></span>
                         </div>
+                        ${item.status === 'sent' ? `
+                        <button onclick="window.markArtifactAsReceived('${item.id}')" class="px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+                            Terima
+                        </button>
+                        ` : `
+                        <div class="px-2 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase rounded-lg border border-emerald-100">
+                            Diterima
+                        </div>
+                        `}
+                        ` : ''}
+
+                        ${isGuru && item.status === 'draft' ? `
+                        <button onclick="window.sendArtifact('${item.id}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center gap-2">
+                            <i data-lucide="send" class="w-3 h-3"></i> Kirim ke Admin
+                        </button>
+                        ` : ''}
+                        
+                        ${isGuru && item.status !== 'draft' ? `
+                         <div class="text-xs text-gray-400 italic">
+                            ${item.status === 'received' ? 'Sudah Diterima Admin' : 'Menunggu Review Admin'}
+                         </div>
                         ` : ''}
                     </div>
                 </div>
