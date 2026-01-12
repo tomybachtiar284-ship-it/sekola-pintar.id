@@ -340,7 +340,7 @@ function getMenuItems() {
                 { id: 'todays-material', label: 'Materi Hari Ini', icon: 'book-open' },
                 { id: 'teaching-hours', label: 'Jam Mengajar', icon: 'clock' },
                 { id: 'class-notes', label: 'Catatan Kelas', icon: 'clipboard' },
-                { id: 'create-quiz', label: 'Buat Soal', icon: 'file-question' }
+                { id: 'create-quiz', label: 'Bank Soal', icon: 'file-question' }
             ]
         },
         { id: 'settings', label: 'Pengaturan', icon: 'settings', roles: [UserRole.ADMIN_SEKOLAH] },
@@ -938,8 +938,16 @@ function renderArtifactsPage(type, title, subtitle) {
         // Teachers see ONLY their own artifacts
         artifacts = artifacts.filter(a => a.guruId === state.user.id);
     } else if (isAdmin) {
-        // Admins see ONLY SENT artifacts
-        artifacts = artifacts.filter(a => a.status === 'sent');
+        // Admins see SENT and RECEIVED artifacts
+        artifacts = artifacts.filter(a => a.status === 'sent' || a.status === 'received');
+
+        // Apply Filters
+        if (window.artifactFilterMonth) {
+            artifacts = artifacts.filter(a => new Date(a.tanggal).getMonth() + 1 === parseInt(window.artifactFilterMonth));
+        }
+        if (window.artifactFilterTeacher) {
+            artifacts = artifacts.filter(a => a.guruId === window.artifactFilterTeacher);
+        }
     }
 
     // Sort by Date Descending
@@ -965,6 +973,23 @@ function renderArtifactsPage(type, title, subtitle) {
             ` : ''}
         </div>
 
+        ${isAdmin ? `
+        <!-- Admin Filters -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-4 items-center">
+            <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Filter:</span>
+            
+            <select onchange="window.artifactFilterMonth = this.value; renderApp()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">Semua Bulan</option>
+                ${['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'].map((m, i) => `<option value="${i + 1}" ${window.artifactFilterMonth == i + 1 ? 'selected' : ''}>${m}</option>`).join('')}
+            </select>
+
+            <select onchange="window.artifactFilterTeacher = this.value; renderApp()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="">Semua Guru</option>
+                ${state.db.users.filter(u => u.role === UserRole.GURU && u.sekolahId === state.user.sekolahId).map(t => `<option value="${t.id}" ${window.artifactFilterTeacher === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+            </select>
+        </div>
+        ` : ''}
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             ${artifacts.length === 0 ? `
                 <div class="col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
@@ -973,7 +998,7 @@ function renderArtifactsPage(type, title, subtitle) {
                 </div>
             ` : artifacts.map(item => `
                  <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all group relative">
-                    <!-- Action Menu (Only for Guru) -->
+                    <!-- Action Menu (Guru) -->
                     ${isGuru ? `
                     <div class="absolute top-4 right-4 z-20">
                         <button onclick="window.toggleActionMenu('${item.id}', event)" class="bg-white/80 backdrop-blur-sm action-menu-btn text-gray-400 hover:text-indigo-600 transition-colors p-1 rounded-full hover:bg-white shadow-sm border border-transparent hover:border-gray-100">
@@ -989,7 +1014,9 @@ function renderArtifactsPage(type, title, subtitle) {
                                     <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i> Edit
                                 </button>
                                 ` : `
-                                <div class="px-4 py-2 text-xs text-gray-400 italic text-center">Terkirim</div>
+                                <div class="px-4 py-2 text-xs text-gray-400 italic text-center border-b border-gray-50">
+                                    ${item.status === 'received' ? 'Sudah Diterima' : 'Menunggu Review'}
+                                </div>
                                 `}
                                 <button onclick="window.deleteArtifact('${item.id}')" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 border-t border-gray-50">
                                     <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i> Hapus
@@ -1000,9 +1027,7 @@ function renderArtifactsPage(type, title, subtitle) {
                     ` : ''}
 
                     <div class="flex items-start justify-between mb-4 pr-8">
-                        <span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border ${item.status === 'sent' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' : 'bg-gray-100 text-gray-500 border-gray-200'}">
-                            ${item.status === 'sent' ? 'TERKIRIM' : 'DRAFT'}
-                        </span>
+                        ${getStatusBadge(item.status)}
                         <span class="text-xs text-gray-400 font-medium">${item.tanggal}</span>
                     </div>
                     
@@ -1017,9 +1042,20 @@ function renderArtifactsPage(type, title, subtitle) {
 
                     <div class="pt-4 border-t border-dashed border-gray-100">
                         ${isAdmin ? `
-                        <div class="flex items-center gap-2 text-xs text-gray-500">
-                            <i data-lucide="user" class="w-3 h-3"></i>
-                            <span>Oleh: <strong>${getTeacherName(item.guruId)}</strong></span>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-2 text-xs text-gray-500">
+                                <i data-lucide="user" class="w-3 h-3"></i>
+                                <span>Oleh: <strong>${getTeacherName(item.guruId)}</strong></span>
+                            </div>
+                            ${item.status === 'sent' ? `
+                            <button onclick="window.markArtifactAsReceived('${item.id}')" class="px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold uppercase tracking-wider rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
+                                Terima
+                            </button>
+                            ` : `
+                            <div class="px-2 py-1 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase rounded-lg border border-emerald-100">
+                                Diterima
+                            </div>
+                            `}
                         </div>
                         ` : ''}
                     </div>
@@ -1029,6 +1065,12 @@ function renderArtifactsPage(type, title, subtitle) {
     `;
     setTimeout(initIcons, 0);
     return container;
+}
+
+function getStatusBadge(status) {
+    if (status === 'draft') return `<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border bg-gray-100 text-gray-500 border-gray-200">DRAFT</span>`;
+    if (status === 'sent') return `<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border bg-amber-50 text-amber-600 border-amber-100">TERKIRIM</span>`;
+    return `<span class="px-3 py-1 text-[10px] font-bold uppercase tracking-widest rounded-full border bg-emerald-50 text-emerald-600 border-emerald-100">DITERIMA</span>`;
 }
 
 // --- ARTIFACT ACTIONS ---
@@ -1110,6 +1152,18 @@ window.sendArtifact = (id) => {
         saveDB({ ...state.db, teachingArtifacts: artifacts });
         renderApp();
         alert('Dokumen berhasil dikirim ke Admin.');
+    }
+};
+
+window.markArtifactAsReceived = (id) => {
+    if (confirm('Tandai dokumen ini sebagai "Diterima"?')) {
+        const artifacts = state.db.teachingArtifacts.map(a => {
+            if (a.id === id) return { ...a, status: 'received' };
+            return a;
+        });
+        saveDB({ ...state.db, teachingArtifacts: artifacts });
+        renderApp();
+        alert('Dokumen berhasil diterima.');
     }
 };
 
