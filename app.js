@@ -200,6 +200,11 @@ function setUser(user) {
 
 // Navigation Helper
 window.navigate = (tabId) => {
+    // RESET ADMIN BANK SOAL FILTER
+    if (tabId === 'create-quiz' && window.adminQuizFilter) {
+        window.adminQuizFilter = { teacherId: '', subject: '' };
+    }
+
     state.activeTab = tabId;
     window.location.hash = tabId;
     localStorage.setItem('activeTab', tabId);
@@ -365,38 +370,83 @@ function expandParentMenu(tabId) {
 // --- LOGIN COMPONENT ---
 function renderLogin() {
     const container = document.createElement('div');
-    container.className = "min-h-screen flex flex-col items-center justify-center bg-indigo-900 p-6";
+    container.className = "min-h-screen flex flex-col items-center justify-center bg-indigo-50 p-6";
 
     container.innerHTML = `
-        <div class="w-full max-w-md bg-white rounded-3xl shadow-2xl overflow-hidden">
-          <div class="bg-indigo-600 p-8 text-white text-center">
-            <div class="w-auto h-24 flex items-center justify-center mx-auto mb-4">
-              <img src="assets/logo.png" alt="Logo Sekolah Pintar" class="h-full object-contain filter drop-shadow-md" />
+        <div class="w-full max-w-5xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[600px]">
+            
+            <!-- Left Side: Brand & Hero -->
+            <div class="w-full md:w-1/2 p-12 bg-[#2563eb] text-white flex flex-col justify-between relative overflow-hidden bg-cover bg-center" style="background-image: url('assets/login-bg.jpg');">
+                <!-- Overlay -->
+                <div class="absolute inset-0 bg-indigo-900/80 backdrop-blur-[2px]"></div>
+                
+                <!-- Decorative Circles (Adjusted opacity) -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl z-0"></div>
+                <div class="absolute bottom-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-32 -mb-32 blur-3xl z-0"></div>
+                
+                <div class="relative z-10 text-center flex-1 flex flex-col items-center justify-center">
+                    <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center shadow-lg mb-8 animate-float">
+                        <img src="assets/logo.png" alt="Logo" class="w-20 h-20 object-contain" />
+                    </div>
+                    <h1 class="text-3xl font-bold mb-2">sekolah-pintar.id</h1>
+                    <p class="text-blue-100 text-lg">Sistem Multi-Role Presensi Terintegrasi</p>
+                </div>
+                
+                <div class="relative z-10 text-center text-sm text-blue-200 mt-8">
+                    &copy; ${new Date().getFullYear()} Sekolah Pintar Indonesia
+                </div>
             </div>
-            <h1 class="text-2xl font-bold">sekolah-pintar.id</h1>
-            <p class="text-indigo-100 mt-2">Sistem Multi-Role Presensi</p>
-          </div>
-          <form id="loginForm" class="p-8">
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
-                <input type="email" id="emailInput" placeholder="admin@sekolah-a.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all" required />
-              </div>
-              <div>
-                <label class="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-                <input type="password" value="123456" disabled class="w-full px-4 py-3 rounded-xl border border-gray-200 bg-gray-50 text-gray-400" />
-              </div>
+
+            <!-- Right Side: Login Form -->
+            <div class="w-full md:w-1/2 p-12 bg-white flex flex-col justify-center">
+                <div class="max-w-md mx-auto w-full">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-2">Selamat Datang 👋</h2>
+                    <p class="text-gray-500 mb-8">Silakan masuk untuk melanjutkan akses.</p>
+
+                    <form id="loginForm" class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Email Address</label>
+                            <div class="relative">
+                                <i data-lucide="mail" class="absolute left-4 top-3.5 w-5 h-5 text-gray-400"></i>
+                                <input type="email" id="emailInput" placeholder="name@school.com" class="w-full pl-12 pr-4 py-3.5 rounded-xl border border-gray-200 focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none transition-all font-medium" required />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">Password</label>
+                            <div class="relative">
+                                <i data-lucide="lock" class="absolute left-4 top-3.5 w-5 h-5 text-gray-400"></i>
+                                <input type="password" value="123456" disabled class="w-full pl-12 bg-gray-50 pr-4 py-3.5 rounded-xl border border-gray-200 text-gray-500 cursor-not-allowed" />
+                            </div>
+                            <p class="text-xs text-right mt-2 text-blue-600 hover:text-blue-700 cursor-pointer font-bold">Lupa Password?</p>
+                        </div>
+
+                        <button type="submit" class="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-200 transition-all transform hover:-translate-y-1 active:scale-[0.98] flex items-center justify-center gap-2">
+                            <span>Masuk Sekarang</span>
+                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        </button>
+                    </form>
+
+                    <!-- Quick Login Hints -->
+                    <div class="mt-10 pt-6 border-t border-gray-100">
+                        <p class="text-center text-xs text-gray-400 mb-4 font-bold uppercase tracking-wider">Akun Demo Tersedia</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button type="button" onclick="document.getElementById('emailInput').value='admin@sekolah-a.com'" class="text-xs p-2 rounded-lg bg-gray-50 hover:bg-blue-50 text-gray-600 hover:text-blue-600 border border-gray-100 transition-colors">
+                                🏫 Admin Sekolah
+                            </button>
+                            <button type="button" onclick="document.getElementById('emailInput').value='budi@sekolah-a.com'" class="text-xs p-2 rounded-lg bg-gray-50 hover:bg-blue-50 text-gray-600 hover:text-blue-600 border border-gray-100 transition-colors">
+                                👨‍🏫 Guru
+                            </button>
+                            <button type="button" onclick="document.getElementById('emailInput').value='scanner@sekolah-a.com'" class="text-xs p-2 rounded-lg bg-gray-50 hover:bg-blue-50 text-gray-600 hover:text-blue-600 border border-gray-100 transition-colors">
+                                📷 Staff Scan
+                            </button>
+                            <button type="button" onclick="document.getElementById('emailInput').value='admin@system.com'" class="text-xs p-2 rounded-lg bg-gray-50 hover:bg-blue-50 text-gray-600 hover:text-blue-600 border border-gray-100 transition-colors">
+                                🔧 Super Admin
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <button type="submit" class="w-full mt-8 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl shadow-lg transition-all transform active:scale-[0.98]">
-              Masuk Sekarang
-            </button>
-            <div class="mt-8 pt-6 border-t border-gray-100 text-center text-xs text-gray-500">
-              <p>Admin Sekolah: admin@sekolah-a.com</p>
-              <p>Guru Sekolah: budi@sekolah-a.com</p>
-              <p>Staff Scan: scanner@sekolah-a.com</p>
-              <p>Super Admin: admin@system.com</p>
-            </div>
-          </form>
         </div>
     `;
 
@@ -407,13 +457,16 @@ function renderLogin() {
             const email = document.getElementById('emailInput').value.toLowerCase();
             const foundUser = state.db.users.find(u => u.email === email);
             if (foundUser) {
-                setUser(foundUser);
+                // Determine layout based on role
+                state.layout = (foundUser.role === UserRole.SCANNER) ? 'scanner' : 'dashboard';
                 setUser(foundUser);
             } else {
-                alert('Email tidak ditemukan. Coba: admin@sekolah-a.com, budi@sekolah-a.com, atau scanner@sekolah-a.com');
+                alert('Email tidak ditemukan. Silakan gunakan akun demo di bawah.');
             }
         });
-        initIcons();
+
+        // Re-init generic icons just in case
+        if (window.lucide) window.lucide.createIcons();
     }, 0);
 
     return container;
@@ -549,14 +602,14 @@ function renderLayout() {
                 
                 <div class="relative h-full flex flex-col md:flex-row items-start md:items-center justify-between pointer-events-none">
                      
-                     <!-- Left Ribbon (Title) -->
-                    <div class="ribbon-left bg-[#1e3a5f] text-white py-3 md:py-4 pl-6 md:pl-8 pr-12 md:pr-16 shadow-lg relative z-20 pointer-events-auto min-w-[280px] md:min-w-[400px]">
+                      <!-- Left Ribbon (Title) -->
+                    <div class="ribbon-left bg-[#1e3a5f] text-white py-3 md:py-4 pl-4 md:pl-8 pr-8 md:pr-16 shadow-lg relative z-20 pointer-events-auto w-full md:w-auto md:min-w-[400px]">
                         <div class="flex items-center gap-3 md:gap-4">
                              <button class="md:hidden p-1 text-white hover:bg-white/20 rounded focus:outline-none focus:ring-2 focus:ring-white/50" onclick="window.toggleSidebar()">
                                 <i data-lucide="menu" class="w-6 h-6"></i>
                             </button>
                             <div>
-                                 <h2 class="text-xl md:text-2xl font-black uppercase tracking-wider leading-none font-sans drop-shadow-md">
+                                 <h2 class="text-lg md:text-2xl font-black uppercase tracking-wider leading-none font-sans drop-shadow-md">
                                     ${pageTitle}
                                 </h2>
                                 <p class="text-[10px] text-blue-200 font-bold tracking-[0.2em] mt-1 border-t border-blue-400/30 pt-1 inline-block">SEKOLAH PINTAR INDONESIA</p>
@@ -564,19 +617,18 @@ function renderLayout() {
                         </div>
                     </div>
 
-                    <!-- Right Ribbon (User Info) -->
                     <!-- Right Ribbon (User Info) & Logo -->
-                    <div class="flex items-center self-end md:self-auto -mt-2 md:mt-0 md:-ml-8 z-10 pointer-events-auto relative">
+                    <div class="flex items-center self-end md:self-auto mt-2 md:mt-0 md:-ml-8 z-10 pointer-events-auto relative w-full md:w-auto justify-end md:justify-start px-4 md:px-0">
                         <!-- Logo Dinas -->
-                         <img src="assets/logo_dinas.png" alt="Logo Dinas" class="h-24 w-24 object-contain filter drop-shadow-[0_8px_8px_rgba(0,0,0,0.3)] relative z-20 mr-4 mb-2 md:mb-0 animate-float" />
+                         <img src="assets/logo_dinas.png" alt="Logo Dinas" class="h-12 md:h-20 w-12 md:w-20 object-contain filter drop-shadow-[0_8px_8px_rgba(0,0,0,0.3)] relative z-20 mr-2 md:mr-4 animate-float" />
 
-                        <div class="ribbon-right bg-[#22d3ee] py-2 md:py-3 pl-12 md:pl-16 pr-6 md:pr-8 shadow-lg relative z-10 min-w-[260px] md:min-w-[350px]">
+                        <div class="ribbon-right bg-[#22d3ee] py-2 md:py-3 pl-4 md:pl-16 pr-4 md:pr-8 shadow-lg relative z-10 flex-1 md:flex-none md:min-w-[350px] rounded-l-xl md:rounded-l-none rounded-r-none">
                             <div class="flex items-center justify-end gap-3 md:gap-4 text-right">
-                                <div class="hidden sm:block">
-                                     <p class="text-[10px] font-black text-[#0f2440] uppercase tracking-widest leading-tight">
+                                <div class="block">
+                                     <p class="text-[10px] font-black text-[#0f2440] uppercase tracking-widest leading-tight hidden sm:block">
                                         ${new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' })}
                                     </p>
-                                    <p class="text-sm font-bold text-[#1e3a5f] leading-tight">
+                                    <p class="text-xs md:text-sm font-bold text-[#1e3a5f] leading-tight truncate max-w-[150px] md:max-w-none">
                                         ${state.user.name}
                                     </p>
                                 </div>
@@ -590,7 +642,8 @@ function renderLayout() {
             </header>
 
             <!-- MAIN SCROLLABLE CONTENT -->
-            <main id="mainContent" class="flex-1 overflow-y-auto w-full max-w-full p-6 pb-20 scroll-smooth">
+            <!-- MAIN SCROLLABLE CONTENT -->
+            <main id="mainContent" class="flex-1 overflow-y-auto w-full max-w-full p-4 md:p-6 pb-20 scroll-smooth">
                 <!-- Content injected here -->
             </main>
 
@@ -927,18 +980,138 @@ function renderArtifactsPage(type, title, subtitle) {
     const container = document.createElement('div');
     container.className = "space-y-6 fade-in";
 
-    // Data Filtering
-    let artifacts = state.db.teachingArtifacts.filter(a => a.type === type && a.sekolahId === state.user.sekolahId);
-
-    // Role Based Visibility
     const isGuru = state.user.role === UserRole.GURU;
     const isAdmin = state.user.role === UserRole.ADMIN_SEKOLAH;
 
+    // --- ADMIN VIEW (FILTER FIRST) ---
+    if (isAdmin && type === 'soal') {
+        // Initialize State for Filters if not exists
+        if (typeof window.adminFilterMonth === 'undefined') window.adminFilterMonth = '';
+        if (typeof window.adminFilterYear === 'undefined') window.adminFilterYear = '';
+        if (typeof window.adminFilterTeacher === 'undefined') window.adminFilterTeacher = '';
+        if (typeof window.adminShowResults === 'undefined') window.adminShowResults = false;
+
+        container.innerHTML = `
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Daftar Soal Masuk</h2>
+                <p class="text-gray-500 text-sm">Filter data untuk melihat soal dari guru</p>
+            </div>
+
+            <!-- Admin Filters -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Bulan</label>
+                        <select onchange="window.adminFilterMonth = this.value; window.adminShowResults = false; renderApp()" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                            <option value="">-- Pilih Bulan --</option>
+                            ${['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'].map((m, i) => `<option value="${i + 1}" ${window.adminFilterMonth == i + 1 ? 'selected' : ''}>${m}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Tahun</label>
+                        <select onchange="window.adminFilterYear = this.value; window.adminShowResults = false; renderApp()" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                            <option value="">-- Pilih Tahun --</option>
+                            <option value="2024" ${window.adminFilterYear === '2024' ? 'selected' : ''}>2024</option>
+                            <option value="2025" ${window.adminFilterYear === '2025' ? 'selected' : ''}>2025</option>
+                            <option value="2026" ${window.adminFilterYear === '2026' ? 'selected' : ''}>2026</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-2 uppercase">Nama Guru</label>
+                        <select onchange="window.adminFilterTeacher = this.value; window.adminShowResults = false; renderApp()" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
+                            <option value="">-- Pilih Guru --</option>
+                            ${state.db.users.filter(u => u.role === UserRole.GURU && u.sekolahId === state.user.sekolahId).map(t => `<option value="${t.id}" ${window.adminFilterTeacher === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button onclick="window.adminShowResults = true; renderApp()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 ${!window.adminFilterMonth || !window.adminFilterYear || !window.adminFilterTeacher ? 'opacity-50 cursor-not-allowed' : ''}" ${!window.adminFilterMonth || !window.adminFilterYear || !window.adminFilterTeacher ? 'disabled' : ''}>
+                        <i data-lucide="search" class="w-5 h-5"></i>
+                        Lihat Data Soal
+                    </button>
+                </div>
+            </div>
+        `;
+
+        if (window.adminShowResults) {
+            // Filter Logic logic for Admin
+            let artifacts = state.db.teachingArtifacts.filter(a =>
+                a.type === type &&
+                a.sekolahId === state.user.sekolahId &&
+                (a.status === 'sent' || a.status === 'received')
+            );
+
+            if (window.adminFilterMonth) {
+                artifacts = artifacts.filter(a => new Date(a.tanggal).getMonth() + 1 === parseInt(window.adminFilterMonth));
+            }
+            if (window.adminFilterYear) {
+                artifacts = artifacts.filter(a => new Date(a.tanggal).getFullYear() === parseInt(window.adminFilterYear));
+            }
+            if (window.adminFilterTeacher) {
+                artifacts = artifacts.filter(a => a.guruId === window.adminFilterTeacher);
+            }
+
+            // Results Grid
+            const resultsHTML = artifacts.length === 0 ? `
+                <div class="mt-8 py-12 text-center text-gray-400 bg-gray-50 rounded-2xl border border-dashed border-gray-200 fade-in">
+                    <i data-lucide="folder-x" class="w-12 h-12 mx-auto mb-3 opacity-20"></i>
+                    <p>Tidak ditemukan data soal dengan filter ini.</p>
+                </div>
+            ` : `
+                <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
+                    ${artifacts.map(item => `
+                        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all group relative">
+                            <div class="flex items-start justify-between mb-4 pr-8">
+                                ${getStatusBadge(item.status)}
+                                <span class="text-xs text-gray-400 font-medium">${item.tanggal}</span>
+                            </div>
+                            
+                            <h3 class="text-lg font-bold text-gray-900 mb-2 leading-tight line-clamp-2">${item.judul}</h3>
+                            <p class="text-sm text-gray-500 mb-4 line-clamp-3">${item.deskripsi || 'Tidak ada deskripsi'}</p>
+                            
+                            <div class="pt-4 border-t border-dashed border-gray-100">
+                                <div class="flex items-center gap-2 text-xs text-gray-500 mb-4">
+                                    <i data-lucide="user" class="w-3 h-3"></i>
+                                    <span>Oleh: <strong>${state.db.users.find(u => u.id === item.guruId)?.name || 'Unknown'}</strong></span>
+                                </div>
+                                
+                                ${item.status === 'sent' ? `
+                                <button onclick="window.markArtifactAsReceived('${item.id}')" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold uppercase tracking-wider rounded-lg transition-colors shadow-sm">
+                                    Terima Soal
+                                </button>
+                                ` : `
+                                <div class="w-full py-2 bg-emerald-50 text-emerald-700 text-[10px] font-bold uppercase text-center rounded-lg border border-emerald-100">
+                                    Sudah Diterima
+                                </div>
+                                `}
+
+                                ${item.url ? `
+                                <a href="${item.url}" target="_blank" class="block w-full text-center mt-2 text-xs text-indigo-600 font-bold hover:underline">
+                                    Lihat Lampiran
+                                </a>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            container.innerHTML += resultsHTML;
+        }
+
+        setTimeout(initIcons, 0);
+        return container;
+    }
+
+    // --- TEACHER VIEW (Legacy/Standard) ---
+    // Data Filtering
+    let artifacts = state.db.teachingArtifacts.filter(a => a.type === type && a.sekolahId === state.user.sekolahId);
+
     if (isGuru) {
-        // Teachers see ONLY their own artifacts
         artifacts = artifacts.filter(a => a.guruId === state.user.id);
-    } else if (isAdmin) {
-        // Admins see SENT and RECEIVED artifacts
+    }
+    // (Admin logic removed from here as it is handled above for 'soal', but left generic for other artifacts)
+    else if (isAdmin) {
         artifacts = artifacts.filter(a => a.status === 'sent' || a.status === 'received');
 
         // Apply Filters
@@ -953,7 +1126,7 @@ function renderArtifactsPage(type, title, subtitle) {
     // Sort by Date Descending
     artifacts.sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
 
-    // Helper for Teacher Name (for Admin View)
+    // Helper for Teacher Name
     const getTeacherName = (id) => {
         const t = state.db.users.find(u => u.id === id);
         return t ? t.name : 'Unknown Guru';
@@ -962,7 +1135,7 @@ function renderArtifactsPage(type, title, subtitle) {
     container.innerHTML = `
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-                <h2 class="text-2xl font-bold text-gray-900">${title}</h2>
+                <h2 class="text-2xl font-bold text-gray-900">${title}${isGuru ? ' Saya' : ''}</h2>
                 <p class="text-gray-500 text-sm">${subtitle}</p>
             </div>
             ${isGuru ? `
@@ -973,7 +1146,7 @@ function renderArtifactsPage(type, title, subtitle) {
             ` : ''}
         </div>
 
-        ${isAdmin ? `
+        ${isAdmin && type !== 'soal' ? `
         <!-- Admin Filters -->
         <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col sm:flex-row gap-4 items-center">
             <span class="text-xs font-bold text-gray-400 uppercase tracking-wider">Filter:</span>
@@ -1006,7 +1179,7 @@ function renderArtifactsPage(type, title, subtitle) {
                         </button>
                          <div id="menu-${item.id}" class="action-menu hidden absolute right-0 top-8 w-40 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden">
                             <div class="py-1">
-                                ${item.status === 'draft' ? `
+                                ${(!item.status || item.status === 'draft') ? `
                                 <button onclick="window.showArtifactModal('${type}', '${title}', '${item.id}')" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2">
                                     <i data-lucide="edit-3" class="w-4 h-4 text-gray-400"></i> Edit
                                 </button>
@@ -1034,7 +1207,7 @@ function renderArtifactsPage(type, title, subtitle) {
                     ` : ''}
 
                     <div class="pt-4 border-t border-dashed border-gray-100 flex items-center justify-between">
-                        ${isAdmin ? `
+                        ${isAdmin && type !== 'soal' ? `
                         <div class="flex items-center gap-2 text-xs text-gray-500">
                             <i data-lucide="user" class="w-3 h-3"></i>
                             <span>Oleh: <strong>${getTeacherName(item.guruId)}</strong></span>
@@ -1050,13 +1223,13 @@ function renderArtifactsPage(type, title, subtitle) {
                         `}
                         ` : ''}
 
-                        ${isGuru && item.status === 'draft' ? `
+                        ${isGuru && (!item.status || item.status === 'draft') ? `
                         <button onclick="window.sendArtifact('${item.id}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors shadow-sm flex items-center gap-2">
                             <i data-lucide="send" class="w-3 h-3"></i> Kirim ke Admin
                         </button>
                         ` : ''}
                         
-                        ${isGuru && item.status !== 'draft' ? `
+                        ${isGuru && item.status && item.status !== 'draft' ? `
                          <div class="text-xs text-gray-400 italic">
                             ${item.status === 'received' ? 'Sudah Diterima Admin' : 'Menunggu Review Admin'}
                          </div>
@@ -2998,6 +3171,11 @@ function renderSettings() {
 // --- CREATE QUIZ COMPONENT ---
 // --- CREATE QUIZ COMPONENT ---
 function renderCreateQuiz() {
+    // ADMIN VIEW CHECK
+    if (state.user.role === UserRole.ADMIN_SEKOLAH || state.user.role === UserRole.SUPER_ADMIN) {
+        return renderAdminBankSoal();
+    }
+
     // Mode toggling state (simple local state approach)
     // Modes: 'list' | 'editor'
     if (!window.currentQuizMode) window.currentQuizMode = 'list';
@@ -3110,6 +3288,10 @@ function renderCreateQuiz() {
         instructions: 'PETUNJUK PENGERJAAN'
     };
 
+    // Get Subjects for Dropdown
+    const subjects = state.db.mapel.filter(m => m.sekolahId === state.user.sekolahId) || [];
+    const subjectOptions = subjects.map(s => `<option value="${s.nama}">${s.nama}</option>`).join('');
+
     const headerHTML = `
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
             <div class="flex items-center justify-between mb-4">
@@ -3141,7 +3323,10 @@ function renderCreateQuiz() {
                 </div>
                  <div class="space-y-3">
                     <input type="text" id="labelSubject" value="${defaultLabels.subject}" class="block text-xs font-bold text-gray-500 uppercase w-full border-none p-0 focus:ring-0 bg-transparent mb-1 hover:text-indigo-600 transition-colors" placeholder="Label Mapel">
-                    <input type="text" id="quizSubject" placeholder="Contoh: PAI & BTQ" class="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    <select id="quizSubject" class="w-full px-4 py-2 rounded-lg border border-gray-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="">-- Pilih Mata Pelajaran --</option>
+                        ${subjectOptions}
+                    </select>
                 </div>
                  <div class="space-y-3">
                     <input type="text" id="labelClass" value="${defaultLabels.class}" class="block text-xs font-bold text-gray-500 uppercase w-full border-none p-0 focus:ring-0 bg-transparent mb-1 hover:text-indigo-600 transition-colors" placeholder="Label Kelas">
@@ -3261,10 +3446,14 @@ b. Nama/Nomor tes ditulis pada sudut kanan atas lembar jawab</textarea>
                     </select>
                 </div>
 
-                <div class="flex justify-end pt-2">
+                <div class="flex justify-end pt-2 gap-3">
+                    <button onclick="window.saveQuiz(true)" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all border border-emerald-200" title="Simpan progress sementara tanpa keluar">
+                        <i data-lucide="save" class="w-5 h-5"></i>
+                        Simpan Draft
+                    </button>
                     <button onclick="window.addQuestion()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95">
-                        <i data-lucide="check-circle" class="w-5 h-5"></i>
-                        Simpan Soal
+                        <i data-lucide="plus-circle" class="w-5 h-5"></i>
+                        Tambah Soal
                     </button>
                 </div>
             </div>
@@ -3379,60 +3568,81 @@ window.deleteQuiz = (id) => {
 }
 
 window.addQuestion = () => {
-    const type = document.querySelector('input[name="questionType"]:checked').value;
-    const text = document.getElementById('questionText').value;
-
-    if (!text) {
-        alert("Pertanyaan harus diisi!");
-        return;
-    }
-
-    let question = {
-        id: Date.now().toString(),
-        type: type,
-        text: text
-    };
-
-    if (type === 'pg') {
-        const options = [
-            document.getElementById('optA').value,
-            document.getElementById('optB').value,
-            document.getElementById('optC').value,
-            document.getElementById('optD').value,
-            document.getElementById('optE').value
-        ];
-        const key = document.getElementById('keyAnswer').value;
-
-        if (options.some(opt => !opt)) {
-            alert("Semua pilihan jawaban A-E harus diisi!");
+    try {
+        if (!window.currentQuizQuestions) window.currentQuizQuestions = [];
+        const typeInput = document.querySelector('input[name="questionType"]:checked');
+        if (!typeInput) {
+            alert("Tipe soal belum dipilih!");
             return;
         }
-        if (!key) {
-            alert("Kunci jawaban harus dipilih!");
+        const type = typeInput.value;
+        const text = document.getElementById('questionText').value;
+
+        if (!text) {
+            alert("Pertanyaan harus diisi!");
             return;
         }
 
-        question.options = options;
-        question.key = key;
+        let question = {
+            id: Date.now().toString(),
+            type: type,
+            text: text
+        };
+
+        if (type === 'pg') {
+            const options = [
+                document.getElementById('optA').value,
+                document.getElementById('optB').value,
+                document.getElementById('optC').value,
+                document.getElementById('optD').value,
+                document.getElementById('optE').value
+            ];
+            const key = document.getElementById('keyAnswer').value;
+
+            // Validation: Require at least 2 options
+            const filledOptionsCount = options.filter(opt => opt.trim() !== '').length;
+            if (filledOptionsCount < 2) {
+                alert("Minimal 2 pilihan jawaban harus diisi!");
+                return;
+            }
+
+            if (!key) {
+                alert("Kunci jawaban harus dipilih!");
+                return;
+            }
+
+            // Validate that the key corresponds to a filled option
+            const keyIndex = ['A', 'B', 'C', 'D', 'E'].indexOf(key);
+            if (!options[keyIndex]) {
+                alert(`Pilihan ${key} (Kunci Jawaban) tidak boleh kosong!`);
+                return;
+            }
+
+            question.options = options;
+            question.key = key;
+        }
+
+        // Add to state
+        window.currentQuizQuestions.push(question);
+
+        // Clear form fields
+        document.getElementById('questionText').value = '';
+        document.getElementById('optA').value = '';
+        document.getElementById('optB').value = '';
+        document.getElementById('optC').value = '';
+        document.getElementById('optD').value = '';
+        document.getElementById('optE').value = '';
+        document.getElementById('keyAnswer').value = '';
+        document.querySelector('input[name="questionType"][value="pg"]').checked = true;
+        window.toggleQuestionType('pg'); // Reset to PG view
+
+        // Refresh view (re-render ensures UI updates)
+        renderAllQuestions();
+        updateTotalQuestions();
+    } catch (e) {
+        console.error("Add Question Error:", e);
+        alert("Gagal menambah soal: " + e.message);
     }
-
-    // Add to state
-    window.currentQuizQuestions.push(question);
-
-    // Clear form fields
-    document.getElementById('questionText').value = '';
-    document.getElementById('optA').value = '';
-    document.getElementById('optB').value = '';
-    document.getElementById('optC').value = '';
-    document.getElementById('optD').value = '';
-    document.getElementById('optE').value = '';
-    document.getElementById('keyAnswer').value = '';
-    document.querySelector('input[name="questionType"][value="pg"]').checked = true;
-    window.toggleQuestionType('pg'); // Reset to PG view
-
-    // Refresh view (re-render ensures UI updates)
-    renderAllQuestions();
-    updateTotalQuestions();
 }
 
 window.removeQuestion = (id) => {
@@ -3568,6 +3778,19 @@ function getHeaderFromDOM() {
 }
 
 window.previewQuiz = (quizData = null) => {
+    // Check draft if we are previewing current editor state (quizData is null)
+    if (!quizData) {
+        const draftText = document.getElementById('questionText')?.value;
+        if (draftText && draftText.trim().length > 0) {
+            if (confirm("PERINGATAN: Ada soal yang belum ditambahkan ke daftar.\n\nKlik OK untuk melihat Preview DENGAN soal tersebut (otomatis ditambahkan).\nKlik Cancel untuk melihat Preview TANPA soal tersebut.")) {
+                const initialCount = window.currentQuizQuestions ? window.currentQuizQuestions.length : 0;
+                window.addQuestion();
+                const newCount = window.currentQuizQuestions ? window.currentQuizQuestions.length : 0;
+                if (newCount <= initialCount) return; // Abort if validation failed
+            }
+        }
+    }
+
     let header, questions;
 
     if (quizData) {
@@ -3792,6 +4015,47 @@ window.previewQuiz = (quizData = null) => {
         </div>
     `;
 
+    // KUNCI JAWABAN SECTION
+    const answerKeyHTML = `
+        <div class="print-preview bg-white p-8 max-w-[210mm] min-h-[297mm] mx-auto border border-gray-300 shadow-lg print:border-none print:shadow-none print:p-0 text-black leading-relaxed mt-8 print:mt-0 page-break-before">
+            <h2 class="text-center font-bold mb-6 border-b-2 border-black pb-2">KUNCI JAWABAN</h2>
+            
+            <div class="grid grid-cols-2 gap-8">
+                <div>
+                    <h3 class="font-bold border-b border-gray-400 mb-2">Pilihan Ganda</h3>
+                    <div class="grid grid-cols-5 gap-2 text-sm">
+                        ${pgQuestions.map((q, i) => `
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold w-6">${i + 1}.</span>
+                                <span class="font-bold text-indigo-900 border border-gray-300 px-2 rounded">${q.key || '-'}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="font-bold border-b border-gray-400 mb-2">Esai (Kata Kunci)</h3>
+                    <div class="space-y-2 text-sm">
+                        ${essayQuestions.map((q, i) => `
+                            <div>
+                                <span class="font-bold">${i + 1}.</span>
+                                <span class="italic text-gray-600">${q.key || 'Kebijakan Guru'}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ${essayQuestions.length === 0 ? '<p class="text-gray-400 italic">Tidak ada soal esai</p>' : ''}
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-4 border-t-2 border-dashed border-gray-300 text-center text-xs text-gray-500">
+                Dokumen Rahasia - Kunci Jawaban ${header.title || 'Ujian'} - ${header.school || 'Sekolah'}
+            </div>
+        </div>
+    `;
+
+    // Combine for display
+    const finalHTML = previewHTML + answerKeyHTML;
+
     // WORD EXPORT FUNCTION
     window.downloadQuizAsWord = (quizData = null) => {
         let header, questions;
@@ -3996,11 +4260,205 @@ window.previewQuiz = (quizData = null) => {
         document.body.removeChild(downloadLink);
     };
 
-    showModal("Preview Soal Ujian", previewHTML, null, 'max-w-5xl');
+    showModal("Preview Soal Ujian & Kunci Jawaban", finalHTML, null, 'max-w-5xl');
+}
+
+// --- ADMIN BANK SOAL VIEW ---
+function renderAdminBankSoal() {
+    const container = document.createElement('div');
+    container.className = "space-y-6 fade-in";
+
+    // Initialize Filters with Search State
+    if (!window.adminQuizFilter) {
+        window.adminQuizFilter = {
+            teacherId: '',
+            subject: '',
+            hasSearched: false // Track if search was triggered
+        };
+    }
+
+    // Get Data
+    const teachers = state.db.users.filter(u => u.role === UserRole.GURU && u.sekolahId === state.user.sekolahId);
+    const subjects = state.db.mapel.filter(m => m.sekolahId === state.user.sekolahId);
+    let exams = state.db.exams || [];
+
+    // Filter Logic
+    let filteredExams = [];
+    let showResults = window.adminQuizFilter.hasSearched; // Only show if triggered
+
+    if (showResults) {
+        filteredExams = exams.filter(exam => {
+            // Check Teacher (authorId)
+            // Note: Old exams might not have authorId. 
+            // If filtering by specific teacher, match ID. 
+            const authorMatch = window.adminQuizFilter.teacherId
+                ? exam.authorId === window.adminQuizFilter.teacherId
+                : true;
+
+            // Check Subject (header.subject) - Flexible match
+            const subjectMatch = window.adminQuizFilter.subject
+                ? (exam.header.subject && exam.header.subject.toLowerCase().includes(window.adminQuizFilter.subject.toLowerCase()))
+                : true;
+
+            return authorMatch && subjectMatch;
+        });
+    }
+
+    // Filter Options HTML
+    const teacherOptions = teachers.map(t =>
+        `<option value="${t.id}" ${window.adminQuizFilter.teacherId === t.id ? 'selected' : ''}>${t.name}</option>`
+    ).join('');
+
+    const subjectOptions = subjects.map(s =>
+        `<option value="${s.nama}" ${window.adminQuizFilter.subject === s.nama ? 'selected' : ''}>${s.nama}</option>`
+    ).join('');
+
+    // Generate Grid HTML (Reusing the card design from renderCreateQuiz)
+    const generateGrid = (examList) => {
+        if (examList.length === 0) {
+            return `
+                <div class="col-span-full py-12 text-center text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">
+                    <i data-lucide="search-x" class="w-12 h-12 mx-auto mb-3 opacity-20"></i>
+                    <p>Tidak ada soal ditemukan</p>
+                </div>
+            `;
+        }
+        return examList.map(exam => {
+            // Find author name if possible
+            const author = state.db.users.find(u => u.id === exam.authorId);
+            let authorName = author ? author.name : 'Administrator / Server';
+
+            // Fallback: If authorId is missing but we want to look clearer
+            if (!author && !exam.authorId) {
+                authorName = 'Tanpa Identitas';
+            }
+
+            return `
+            <div onclick="window.previewQuizFromList('${exam.id}')" class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-all group relative cursor-pointer flex flex-col justify-between h-full">
+                 <div class="absolute top-4 right-4 flex gap-2 z-10">
+                    <button onclick="event.stopPropagation(); window.downloadQuizFromList('${exam.id}')" class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors" title="Download Word">
+                        <i data-lucide="file-text" class="w-4 h-4"></i>
+                    </button>
+                     <button onclick="event.stopPropagation(); window.deleteQuiz('${exam.id}')" class="p-2 bg-rose-50 text-rose-600 rounded-lg hover:bg-rose-100 transition-colors" title="Hapus">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-3 mb-4 pr-10">
+                    <div class="w-12 h-12 flex-shrink-0 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold text-sm border border-indigo-100 overflow-hidden">
+                        ${exam.header.class ? exam.header.class.substring(0, 4) : 'Umum'}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h4 class="font-bold text-gray-800 truncate text-base leading-tight" title="${exam.header.title}">${exam.header.title || 'Tanpa Judul'}</h4>
+                        <p class="text-xs text-gray-500 truncate mt-0.5" title="${exam.header.subject}">${exam.header.subject || 'Tanpa Mapel'}</p>
+                    </div>
+                </div>
+                
+                 <div class="mb-3 text-xs text-indigo-600 font-medium bg-indigo-50 px-3 py-1.5 rounded-lg w-fit">
+                    <i data-lucide="user" class="w-3 h-3 inline mr-1"></i> ${authorName}
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-gray-400 border-t border-gray-50 pt-3 mt-auto">
+                    <span class="flex items-center gap-1.5">
+                        <i data-lucide="calendar" class="w-3.5 h-3.5"></i> 
+                        ${new Date(exam.created).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    </span>
+                    <span class="font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-md text-[10px]">
+                        ${exam.questions.length} Soal
+                    </span>
+                </div>
+            </div>
+        `}).join('');
+    };
+
+    container.innerHTML = `
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
+                <div>
+                     <h3 class="text-xl font-bold text-gray-800 flex items-center gap-2">
+                        <i data-lucide="library" class="w-6 h-6 text-indigo-600"></i>
+                        Bank Soal Sekolah
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1">Filter dan kelola soal dari seluruh guru</p>
+                </div>
+            </div>
+
+            <!-- Filter Section -->
+            <div class="bg-gray-50 rounded-xl border border-gray-100 p-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Filter Guru</label>
+                        <select onchange="window.setAdminQuizFilter('teacherId', this.value)" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="">-- Semua Guru --</option>
+                            ${teacherOptions}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 mb-1">Filter Mata Pelajaran</label>
+                        <select onchange="window.setAdminQuizFilter('subject', this.value)" class="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="">-- Semua Mapel --</option>
+                            ${subjectOptions}
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button onclick="window.applyAdminSearch()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-indigo-200 transition-all hover:scale-105 active:scale-95">
+                        <i data-lucide="search" class="w-4 h-4"></i>
+                        Cari Soal
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <!-- Results Section -->
+        ${!showResults ? `
+             <div class="text-center py-12 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-200">
+                <i data-lucide="filter" class="w-12 h-12 mx-auto mb-3 opacity-20"></i>
+                <h4 class="text-lg font-bold text-gray-600">Filter Data</h4>
+                <p class="text-sm mt-1">Pilih filter dan klik "Cari Soal" untuk menampilkan data.</p>
+            </div>
+        ` : `
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                ${generateGrid(filteredExams)}
+            </div>
+        `}
+    `;
+
+    // Filter Handler (Only updates state, no render)
+    window.setAdminQuizFilter = (key, value) => {
+        window.adminQuizFilter[key] = value;
+        window.adminQuizFilter.hasSearched = false; // Reset search state on change? Or keep? Let's reset to force re-search
+    };
+
+    // Apply Search
+    window.applyAdminSearch = () => {
+        window.adminQuizFilter.hasSearched = true;
+        renderApp();
+    };
+
+    setTimeout(() => window.lucide.createIcons(), 50);
+    return container;
 }
 
 // Save Quiz
-window.saveQuiz = () => {
+window.saveQuiz = (stayInEditor = false) => {
+    // Check for unsaved draft first
+    const draftText = document.getElementById('questionText')?.value;
+    if (draftText && draftText.trim().length > 0) {
+        if (confirm("PERINGATAN: Ada soal yang sudah ditulis tapi BELUM DITAMBAHKAN ke daftar (tombol Tambah Soal belum diklik).\n\nKlik OK untuk otomatis MENAMBAHKAN soal tersebut sekarang.\nKlik Cancel untuk MENGABAIKAN/MEMBUANG soal tersebut.")) {
+            const initialCount = window.currentQuizQuestions ? window.currentQuizQuestions.length : 0;
+            window.addQuestion();
+            const newCount = window.currentQuizQuestions ? window.currentQuizQuestions.length : 0;
+
+            // If count didn't increase, it means addQuestion failed (validation error), so we abort save
+            if (newCount <= initialCount) {
+                return;
+            }
+        }
+    }
+
     // We use getHeaderFromDOM to ensure we capture all fields including custom labels
     const header = getHeaderFromDOM();
 
@@ -4020,29 +4478,45 @@ window.saveQuiz = () => {
                 ...newExams[index],
                 header: header,
                 questions: window.currentQuizQuestions,
-                updated: new Date().toISOString()
+                updated: new Date().toISOString(),
+                // Fix: Claim ownership if missing, or update if needed
+                authorId: newExams[index].authorId || state.user.id,
+                sekolahId: newExams[index].sekolahId || state.user.sekolahId
             };
         }
     } else {
         // Create new
+        const newId = `exam_${Date.now()}`;
+        window.lastCreatedQuizId = newId; // Track ID for stayInEditor mode
         const newQuiz = {
-            id: `exam_${Date.now()}`,
+            id: newId,
             header: header,
             questions: window.currentQuizQuestions,
-            created: new Date().toISOString()
+            created: new Date().toISOString(),
+            // ADDED: Track Metadata
+            authorId: state.user.id,
+            sekolahId: state.user.sekolahId
         };
         newExams.push(newQuiz);
     }
 
     saveDB({ ...currentDB, exams: newExams });
 
-    alert("Soal berhasil disimpan ke Database!");
-
-    // Return to list view
-    window.currentQuizMode = 'list';
-    window.currentQuizId = null;
-    window.currentQuizQuestions = [];
-    window.refreshView();
+    if (stayInEditor) {
+        // If new quiz, set the ID so next save is an update
+        if (!window.currentQuizId && window.lastCreatedQuizId) {
+            window.currentQuizId = window.lastCreatedQuizId;
+        }
+        alert("Draft berhasil disimpan! Anda dapat melanjutkan mengedit.");
+        // We don't exit/refresh, helping user stay in flow
+    } else {
+        alert("Soal berhasil disimpan ke Database!");
+        // Return to list view
+        window.currentQuizMode = 'list';
+        window.currentQuizId = null;
+        window.currentQuizQuestions = [];
+        window.refreshView();
+    }
 }
 
 window.previewQuizFromList = (id) => {
